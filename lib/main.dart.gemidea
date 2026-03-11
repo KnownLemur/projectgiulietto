@@ -1,0 +1,238 @@
+import 'package:flutter/material.dart';
+
+void main() => runApp(const ProjectGiuliettoApp());
+
+class ProjectGiuliettoApp extends StatelessWidget {
+  const ProjectGiuliettoApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.green),
+      home: const TitleScreen(),
+    );
+  }
+}
+
+// --- 1. SCHERMATA TITOLO ---
+class TitleScreen extends StatelessWidget {
+  const TitleScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF1A1A1A), // Sfondo scuro
+      body: GestureDetector(
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const LobbyTableScreen()),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Project Giulietto',
+                style: TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green.shade400,
+                  letterSpacing: 2,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Tocca per iniziare',
+                style: TextStyle(color: Colors.white54),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// --- 2. LOBBY CON TAVOLO ---
+class LobbyTableScreen extends StatefulWidget {
+  const LobbyTableScreen({super.key});
+
+  @override
+  State<LobbyTableScreen> createState() => _LobbyTableScreenState();
+}
+
+class _LobbyTableScreenState extends State<LobbyTableScreen> {
+  // Configurazione Iniziale
+  int _playerCount = 5;
+  int _startingLives = 5;
+  final List<String?> _assignedPlayers = List.filled(8, null);
+  final List<String> _frequentPlayers = [
+    'Giulietto',
+    'Marco',
+    'Andrea',
+    'Sara',
+    'Luca',
+  ];
+
+  void _showPlayerPicker(int index) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Chi siede al posto ${index + 1}?'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              ..._frequentPlayers.map(
+                (name) => ListTile(
+                  title: Text(name),
+                  leading: const Icon(Icons.person),
+                  onTap: () {
+                    setState(() => _assignedPlayers[index] = name);
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+              const Divider(),
+              ListTile(
+                title: const Text('Aggiungi esterno...'),
+                leading: const Icon(Icons.person_add),
+                onTap: () {
+                  // Qui potresti aggiungere un controller per inserire il nome
+                  Navigator.pop(context);
+                },
+              ),
+              if (_assignedPlayers[index] != null)
+                ListTile(
+                  title: const Text(
+                    'Rimuovi giocatore',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  onTap: () {
+                    setState(() => _assignedPlayers[index] = null);
+                    Navigator.pop(context);
+                  },
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF3E2723), // Colore neutro (legno scuro)
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.white),
+            onPressed: () {
+              // Menu impostazioni rapide (cambio vite/numero giocatori)
+            },
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          // IL TAVOLO DA POKER
+          Center(
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.8,
+              height: MediaQuery.of(context).size.height * 0.4,
+              decoration: BoxDecoration(
+                color: Colors.green.shade800,
+                borderRadius: BorderRadius.circular(200),
+                border: Border.all(color: Colors.black45, width: 10),
+                boxShadow: const [
+                  BoxShadow(blurRadius: 20, color: Colors.black54),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  'Giulietto Table',
+                  style: TextStyle(
+                    color: Colors.green.shade200,
+                    fontWeight: FontWeight.w100,
+                    fontSize: 24,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // POSIZIONAMENTO CERCHI GIOCATORI
+          ...List.generate(_playerCount, (index) {
+            // Logica di posizionamento semplificata per il layout stadium
+            // (In un'app reale useremmo calcoli trigonometrici più complessi)
+            return _buildPlayerSpot(index);
+          }),
+
+          // BOTTONE START
+          Positioned(
+            bottom: 50,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  /* Logica inizio partita */
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 15,
+                  ),
+                ),
+                child: const Text('AVVIA PARTITA'),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlayerSpot(int index) {
+    // Coordinate approssimative per un tavolo a 5 (layout a "stella" o giro tavolo)
+    final alignments = [
+      const Alignment(0, -0.65), // Capotavola su
+      const Alignment(0.9, -0.2), // Destra alto
+      const Alignment(0.6, 0.6), // Destra basso
+      const Alignment(-0.6, 0.6), // Sinistra basso
+      const Alignment(-0.9, -0.2), // Sinistra alto
+    ];
+
+    return Align(
+      alignment: alignments[index],
+      child: GestureDetector(
+        onTap: () => _showPlayerPicker(index),
+        child: Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade900,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 2),
+            boxShadow: const [BoxShadow(blurRadius: 10, color: Colors.black26)],
+          ),
+          child: Center(
+            child: _assignedPlayers[index] == null
+                ? const Icon(Icons.add, color: Colors.white)
+                : Text(
+                    _assignedPlayers[index]!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+}

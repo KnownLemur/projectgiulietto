@@ -1,0 +1,53 @@
+import 'package:flutter/material.dart';
+
+class PlayerSpot extends StatelessWidget {
+  final Alignment pos;
+  final String? name;
+  final VoidCallback? onTap;
+
+  const PlayerSpot({
+    super.key,
+    required this.pos,
+    this.name,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: pos,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Stack(
+          clipBehavior: Clip
+              .none, // Permette ai figli di uscire dal cerchio (utile per le vite!)
+          children: [
+            // Il cerchio principale
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.grey[800],
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white70, width: 2),
+              ),
+              child: Center(
+                child: name == null
+                    ? const Icon(Icons.add, color: Colors.white54)
+                    : Text(
+                        name!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+              ),
+            ),
+
+            // Qui in futuro aggiungeremo il cerchietto delle vite come un altro Positioned
+          ],
+        ),
+      ),
+    );
+  }
+}

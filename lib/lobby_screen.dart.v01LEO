@@ -1,0 +1,186 @@
+import 'package:flutter/material.dart';
+import 'player_spot.dart';
+
+class LobbyScreen extends StatefulWidget {
+  const LobbyScreen({super.key});
+
+  @override
+  State<LobbyScreen> createState() => _LobbyScreenState();
+}
+
+class _LobbyScreenState extends State<LobbyScreen> {
+  int _playerCount = 5;
+  int _turn = 1;
+  String get _data => 'Turno: $_turn';
+  List<String?> _playerNames = List.filled(
+    8,
+    null,
+  ); // Nomi dei giocatori (max 8)
+  final List<String> _frequentPlayers = [
+    'Freddy',
+    'Fra',
+    'Anto',
+    'Diego',
+    'Phil',
+    'Leo',
+    'Lollo',
+    'Richi',
+    'Luca',
+  ]; // Nomi frequenti per il menu rapido
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        // Sfondo
+        Container(color: Colors.brown[900]),
+
+        // Barra superiore
+        Scaffold(
+          backgroundColor: Colors.brown[900],
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.settings, color: Colors.white),
+                onPressed: () {
+                  _turn++;
+                  // Menu impostazioni rapide (cambio vite/numero giocatori)
+                },
+              ),
+            ],
+          ),
+        ),
+
+        // Tavolo
+        Center(
+          child: FractionallySizedBox(
+            widthFactor: 0.7,
+            heightFactor: 0.6,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.green[800],
+                borderRadius: BorderRadius.circular(150),
+                border: Border.all(color: Colors.white, width: 4),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _data,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        // Posti dei giocatori
+        ...getPositions(_playerCount).asMap().entries.map((entry) {
+          int idx = entry.key; // Questo è l'indice (0, 1, 2...)
+          Alignment pos = entry.value;
+
+          return PlayerSpot(
+            pos: pos,
+            name: _playerNames[idx], // Passiamo il nome salvato
+            onTap: () => _selectPlayer(idx),
+          );
+        }),
+      ],
+    );
+  }
+
+  void _selectPlayer(int index) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Posto ${index + 1}'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView(
+            shrinkWrap: true, // Fondamentale per far stare il menu nel popup
+            children: [
+              ..._frequentPlayers.map(
+                (name) => ListTile(
+                  title: Text(name),
+                  onTap: () {
+                    setState(() => _playerNames[index] = name);
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+              const Divider(),
+              const ListTile(
+                title: Text("Aggiungi nuovo..."),
+                leading: Icon(Icons.add),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+List<Alignment> getPositions(int count) {
+  if (count == 3) {
+    return [
+      const Alignment(0, -0.8), // Centro alto
+      const Alignment(-0.7, 0.6), // Sinistra basso
+      const Alignment(0.7, 0.6), // Destra basso
+    ];
+  } else if (count == 4) {
+    return [
+      const Alignment(0, -0.8), // Capotavola
+      const Alignment(-0.75, 0), // Sinistra
+      const Alignment(0.75, 0), // Destra
+      const Alignment(0, 0.8), // Sotto
+    ];
+  } else if (count == 5) {
+    return [
+      const Alignment(0, -0.8), // Capotavola
+      const Alignment(-0.75, -0.2), // Sinistra alto
+      const Alignment(0.75, -0.2), // Destra alto
+      const Alignment(-0.4, 0.8), // Sinistra basso
+      const Alignment(0.4, 0.8), // Destra basso
+    ];
+  } else if (count == 6) {
+    return [
+      const Alignment(0, -0.8), // Capotavola
+      const Alignment(-0.8, -0.2), // Sinistra alto
+      const Alignment(0.8, -0.2), // Destra alto
+      const Alignment(-0.8, 0.6), // Sinistra basso
+      const Alignment(0.8, 0.6), // Destra basso
+      const Alignment(0, 0.8), // Sotto
+    ];
+  } else if (count == 7) {
+    return [
+      const Alignment(0, -0.8), // Capotavola
+      const Alignment(-0.6, -0.75), // Sinistra alto
+      const Alignment(0.6, -0.75), // Destra alto
+      const Alignment(-0.75, 0.3), // Sinistra basso
+      const Alignment(0.75, 0.3), // Destra basso
+      const Alignment(-0.3, 0.8), // Sinistra basso
+      const Alignment(0.3, 0.8), // Destra sotto
+    ];
+  } else if (count == 8) {
+    return [
+      const Alignment(0, -0.8), // Capotavola
+      const Alignment(-0.5, -0.75), // Sinistra alto
+      const Alignment(0.5, -0.75), // Destra alto
+      const Alignment(-0.75, 0), // Sinistra basso
+      const Alignment(0.75, 0), // Destra basso
+      const Alignment(-0.5, 0.75), // Sinistra sotto
+      const Alignment(0.5, 0.75), // Destra sotto
+      const Alignment(0, 0.8), // Sotto centrale
+    ];
+  } else {
+    throw ArgumentError('Unsupported player count: $count');
+  }
+}
